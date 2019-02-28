@@ -146,8 +146,9 @@ def task1_err_ellipses():
 
 def task1_err_to_dt():
     t0, t1 = 0, 20
-    N = 70000
-    dts = numpy.flip(numpy.linspace(0.0001, 7, N))
+    dt1 = 20
+    N = 10000 * dt1
+    dts = numpy.flip(numpy.linspace(0.0001, dt1, N))
     v0 = 1
     y0 = [1, 0, 0, v0]
     solved = []
@@ -177,7 +178,7 @@ def task1_err_to_dt():
     plt.xlabel("$\\mathrm{d}t$")
     plt.ylabel("$\\mathrm{error} = ||\\, \\mathbf{1} - \\sqrt{\\mathbf{x}_c^2 + \\mathbf{y}_c^2}\\,||$")
     plt.plot(dts, errors, linewidth=0.5)
-    fig.savefig("images/error_circular_wr_dt_calculated.pdf", bbox_inches="tight")
+    fig.savefig("images/error_circular_wr_dt_calculated_{}.pdf".format(dt1), bbox_inches="tight")
     plt.show()
 
     fig = plt.figure()
@@ -185,7 +186,7 @@ def task1_err_to_dt():
     plt.xlabel("$\\mathrm{d}t$")
     plt.ylabel("$\\mathrm{error} = ||\\, \\mathbf{1} - \\sqrt{\\mathbf{x}_m^2 + \\mathbf{y}_m^2}\\,||$")
     plt.plot(dts, errorsm, linewidth=0.5)
-    fig.savefig("images/error_circular_wr_dt_midpoints.pdf", bbox_inches="tight")
+    fig.savefig("images/error_circular_wr_dt_midpoints_{}.pdf".format(dt1), bbox_inches="tight")
     plt.show()
 
     fig = plt.figure()
@@ -195,7 +196,7 @@ def task1_err_to_dt():
     p1, = plt.plot(dts, errors, linewidth=0.5)
     p2, = plt.plot(dts, errorsm, linewidth=0.5)
     plt.legend([p1, p2], ["calculated", "midpoints"], loc="upper left")
-    fig.savefig("images/error_circular_wr_dt.pdf", bbox_inches="tight")
+    fig.savefig("images/error_circular_wr_dt_{}.pdf".format(dt1), bbox_inches="tight")
     plt.show()
 
 
