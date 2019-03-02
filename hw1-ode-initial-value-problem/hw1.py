@@ -201,7 +201,7 @@ def task1_err_to_dt():
 
 
 def task1_circular_dt(dt):
-    t0, t1 = 0, 1000
+    t0, t1 = 0, 4000
     v0 = 1
     y0 = [1, 0, 0, v0]
     solved = planetary_motion(y0, t0, t1, dt)
@@ -315,8 +315,8 @@ def planetary_motion2(y0, t0, t1, dt):
     return numpy.array(planet), numpy.array(bypass)
 
 
-def plot_trajectory2(planet, bypass, phi):
-    fig = plt.figure(figsize=(8,7))
+def plot_trajectory2(planet, bypass, phi, omit_scales=False):
+    fig = plt.figure(figsize=(20,5))
     plt.scatter([0], [0], c="red")
 
     xp = numpy.array([s[0] for s in planet[:,1]])
@@ -327,8 +327,9 @@ def plot_trajectory2(planet, bypass, phi):
     plt.plot(xp, yp, linewidth=1)
     plt.plot(xb, yb, linewidth=0.5)
 
-    plt.xlim((-5, 5))
-    plt.ylim((-5, 5))
+    if not omit_scales:
+        plt.xlim((-5, 5))
+        plt.ylim((-5, 5))
     plt.title("Motion of a planet when star bypasses it ($\\varphi = {}\\pi$)".format(numpy.round(phi / scipy.constants.pi, 2)))
     plt.xlabel("x")
     plt.ylabel("y")
@@ -339,12 +340,25 @@ def plot_trajectory2(planet, bypass, phi):
 
 def task2():
     t0, t1 = 0, 100
-    phi = scipy.constants.pi / 6
+    phis = [0, scipy.constants.pi, 3*scipy.constants.pi / 2, scipy.constants.pi / 2, scipy.constants.pi / 3, scipy.constants.pi / 4,  scipy.constants.pi / 6]
+    for phi in phis:
+        y0 = [-numpy.sin(phi), numpy.cos(phi), numpy.cos(phi), numpy.sin(phi)]
+        # y0 = [-numpy.sin(phi), numpy.cos(phi), -numpy.cos(phi), -numpy.sin(phi)]
+        dt = 0.01
+
+        planet, bypass = planetary_motion2(y0, t0, t1, dt)
+        plot_trajectory2(planet, bypass, phi)
+
+
+def task2_follows():
+    t0, t1 = 0, 70
+    phi = 1.33 * scipy.constants.pi
     y0 = [-numpy.sin(phi), numpy.cos(phi), numpy.cos(phi), numpy.sin(phi)]
     dt = 0.01
-
+    
     planet, bypass = planetary_motion2(y0, t0, t1, dt)
-    plot_trajectory2(planet, bypass, phi)
+    plot_trajectory2(planet, bypass, phi / scipy.constants.pi, omit_scales=True)
+
 
 ################################################################################
 #
@@ -358,8 +372,9 @@ if __name__ == "__main__":
     # task1_err_ellipse()
     # task1_err_ellipses()
     # task1_err_to_dt()
-    # task1_circular_dt(dt=scipy.constants.pi/2)
+    # task1_circular_dt(dt=10)
     # task1_stability()
     # task1_small_ellipse()
 
     # task2()
+    task2_follows()
