@@ -1,0 +1,153 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[slovene]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[left=2cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{float}
+
+\title{Modelska analiza II\\\footnotesize Naloga 1 -- Navadne diferencialne enacbe: zacetni problem}
+\author{Marcel Čampa, 27182042}
+\date{\today}
+
+\begin{document}
+    \maketitle
+
+    \section*{Naloga 1}
+    Pri prvi nalogi smo spremljali gibanje planeta okrog sonca. Ce zapisemo \textit{Newtonov
+    gravitacijski zakon}, dobimo enacbo
+    $$ m \ddot{\mathbf{r}} = -G \frac{mM}{r^3} \mathbf{r},$$
+    kjer je $G$ gravitacijska konstanta, $m$ masa planeta, $M$ masa sonca, $\mathbf{r}$ pa vektor razdalje med planetom in soncem.
+    Ce zapisemo se $\mathbf{r} = (x, y)^T$ in $\dot{\mathbf{r}} = (u, v)^T$, lahko zgornjo enacbo prepisemo v
+    sistem
+    \begin{align*}
+        \dot{x} &= u\\
+        \dot{y} &= v\\
+        \dot{u} &= -G \frac{Mx}{(x^2 + y^2)^{1.5}}\\
+        \dot{v} &= -G \frac{My}{(x^2 + y^2)^{1.5}}.
+    \end{align*}
+    Izberemo si zacetne pogoje $$x(0) = a,~~~ y(0) = 0, ~~~u(0) = 0,~~~v(0) = a\omega v_0,$$
+    torej da planet zacne v tocki $\mathbf{r} = (a, 0)^T$, z gibanjem pa zacne navpicno navzgor ob predpostavki, da je
+    $v(0) > 0$. Zaradi poenostavitve sem si izbral $G = M = a = \omega = 1$ in opazoval trajektorije
+    pri razlicnih $v_0$, kar je predstavljeno na sliki \ref{fig:task1_trajectory}. \textit{Opomba: Celo nalogo sem reseval
+    s \texttt{scipy.integrate.ode} z metodo \texttt{dopri5}, kar je pravzaprav Runge-Kutta.}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.45\textwidth]{../images/to_use/task1_trajectory.pdf}
+        \caption{Trajektorije za razlicne $v_0$. Izkaze se, da je trajektorija za $v_0 \in (0, 1) \cup (1, \sqrt{2})$ elipsa,
+        za $v_0 = 1$ kroznica, za $v_0 = \sqrt{2}$ hiperbola in za $v_0 > \sqrt{2}$ parabola. Ker je kroznica le posebna oblika elipse, lahko recemo, da je tir
+        elipsa do mejne vrednosti $v_0 = \sqrt{2}$, kjer se elipsa odpre in postane hiperbola, za vecje $v_0$ pa se odpre v parabolo.}
+        \label{fig:task1_trajectory}
+    \end{figure}
+
+    Nato sem se lotil malo analize. V odvisnosti od koraka $\text{d}t$ sem si pogledal trajektorije. Pricakovano se
+    manjsi $v_0$ zahtevajo manjsi $\text{d}t$, saj se za majhne $v_0$ tir pribliza blizu tocke $(0,0)^T$, kar pomeni, da problem postane nestabilen.
+    To je lepo prikazano na sliki \ref{fig:task1_errs_elliptic}.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{../images/to_use/err_elliptic_dt_v0.pdf}
+        \caption{Opazimo, da pri manjsih $v_0$ napaka trajektorije ostane tudi do manjsih $\text{d}t$, dokler potem koncno ,,ne izgine''.}
+        \label{fig:task1_errs_elliptic}
+    \end{figure}
+
+    Ogledal sem si se \textbf{napako radija v odvisnosti od dolzine koraka} $\text{d}t$. Seveda je pricakovano ta napaka zanemarljivo majhna, vendar vseeno lepo narasca, potem pa se pri $\text{d}t = 2\pi$ pricakovano
+    zmanjsa, vendar ne cisto do $0$. To lepo prikazuje slika \ref{fig:task1_err_points} (levo). Potem sem pa namesto izracunanih tock vzel tocke na polovici
+    med izracunanimi, kar nam da boljsi obcutek glede napake kot prejsnji izracun. Spet napaka pricakovano narasca, tokrat pa se obrne ze pri $\text{d}t = \pi$, kar je tudi ocitno,
+    saj se sredisce daljice med izracunanimi tockami do $\text{d}t = \pi$ priblizuje srediscu $(0,0)^T$, potem pa spet zacne zmanjsevati. To je prikazano na sliki \ref{fig:task1_err_points} (desno).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../images/to_use/error_circular_wr_dt_calculated_7.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/to_use/error_circular_wr_dt_7.pdf}
+        \caption{Napaka med kroznico $\mathcal{K}((0,0)^T, 1)$ in izracunanimi tockami krivulje (levo) in napaka med kroznico $\mathcal{K}((0,0)^T,1)$ in sredisci daljic med izracunanimi tockami
+        (desno). Na desni sliki je tudi levi graf.}
+        \label{fig:task1_err_points}
+    \end{figure}
+
+    Za konec sem analiziral se \textbf{napako radija, energije in vrtilne kolicine v odisnosti od iteracije}.
+    Vse tri grafe je bilo potrebno narisati na logaritemski skali, drugace ne bi videli nic pametnega. Grafi so prikazani na sliki \ref{fig:task1_stabilities}, napake smo izracunali s formulami
+    \begin{itemize}
+        \item napaka razdalje: $r_{\text{err}} = |1 - \sqrt{x^2 + y^2}|$,
+        \item napaka energije: $E_{\text{err}} = |E - E_0| = \left| \left(\frac{1}{2} (x^2+y^2) - 1 \right) + \frac{1}{2} \right|$ in
+        \item napaka vrtilne kolicine: $L_{\text{err}} = |L_z - L_{z_0}| = |(xv - yu) - 1|$.
+    \end{itemize}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{../images/to_use/task1_stability_r.pdf}\\
+        \includegraphics[width=0.5\textwidth]{../images/to_use/task1_stability_E.pdf}\\
+        \includegraphics[width=0.5\textwidth]{../images/to_use/task1_stability_L.pdf}
+        \caption{Odvisnost napake razdalje (zgoraj), energije (v sredini) in vrtilne kolicine (spodaj) v odvisnosti od casa
+        potovanja -- iteracije.}
+        \label{fig:task1_stabilities}
+    \end{figure}
+
+    Za konec pa sem se malo poigral se z razlicnimi $\text{d}t$ in dobil precej zanimive slike, nekaj od njih je na sliki
+    \ref{fig:task1_interesting}. Seveda te slike nimajo nobenega fizikalnega smisla, sem jih pa vseeno vkljucil zaradi zanimivosti :).
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../images/to_use/trajectory_dt=pipolovic.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/to_use/trajectory_dt=pi.pdf}\\
+        \includegraphics[width=0.85\textwidth]{../images/to_use/trajectory_dt=10.pdf}
+        \caption{Pri $\text{d}t = \pi/2$ dobimo kvadrat (zgoraj levo) in za $\text{d}t = \pi$ daljico (zgoraj desno).
+        Pri obeh pa vidimo napako, ki se zgodi, saj kvadrat ni cisti kvadrat, predvsem pa vidimo pri daljici, kako se pocasi zamika po krogu.
+        Za $\text{d}t = 10$ pa dobimo precej lep vzorec (spodaj).}
+        \label{fig:task1_interesting}
+    \end{figure}
+
+    \section*{Naloga 2}
+
+    Pri tej nalogi sem zasledoval gibanje planeta okrog sonca, pri cemer vmes mimo pride mimobezna zvezda, ki se giblje po
+    premici $$\mathbf{r}_z(t) = \begin{bmatrix}-10 + 2v_0 t\\ 1.5 \end{bmatrix}.$$ Iz Newtonovega zakona dobimo
+    $$ m\ddot{\mathbf{r}} = -G \frac{mM}{r^3} \mathbf{r} - G\frac{mM}{|r - r_z|^3} (\mathbf{r} - \mathbf{r}_z).$$
+    Zopet dobljeno prepisemo v sistem stirih enacb in dobimo
+    \begin{align*}
+        \dot{x} &= u\\
+        \dot{y} &= v\\
+        \dot{u} &= - G \frac{Mx}{(x^2 + y^2)^1.5} - G \frac{M(x-x_z)}{\left( (x-x_z)^2 + (y-y_z)^2 \right)^1.5}\\
+        \dot{v} &= - G \frac{My}{(x^2 + y^2)^1.5} - G \frac{M(y-y_z)}{\left( (x-x_z)^2 + (y-y_z)^2 \right)^1.5}.
+    \end{align*}
+    Zaradi poenostavitve si spet izberemo $G = M = a = \omega = 1$. Zacetni pogoji se tokrat malo spremenijo, in sicer jih bomo
+    zapisali v odvisnosti od zacetne faze planeta $\varphi$:
+    $$ x(0) = -\sin \varphi,~~~ y(0) = \cos \varphi,~~~ u(0) = \pm v_0 \cos \varphi, ~~~ v(0) = \pm v_0 \sin\varphi,$$
+    kjer bomo vzeli $v_0 = 1$, $\pm$ v $u(0)$ in $v(0)$ pa nam definirata, v katero smer se bo gibal planet (pri $+$ se giblje v negativni smeri, torej
+    smeri urinega kazalca). Slika \ref{fig:task2_negative} prikazuje gibanje v smeri urinega kazalca, slika \ref{fig:task2_positive} gibanje v nasprotni smeri
+    urinega kazalca, slika \ref{fig:task2_follows} pa prikazuje primere, pri katerih se planet ujame v orbito mimobezne zvezde.
+    
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../images/task2_negative/task2_trajectory_phi=0.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/task2_negative/task2_trajectory_phi=157079632679.pdf}\\
+        \includegraphics[width=0.4\textwidth]{../images/task2_negative/task2_trajectory_phi=314159265359.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/task2_negative/task2_trajectory_phi=471238898038.pdf}
+        \caption{Gibanje v smeri urinega kazalca za razlicne vrednosti zacetne faze $\varphi$. Opazimo, da v nekaj primerih planet pobegne od sonca, kar pa se zgodi zato,
+        ker je pri tem gibanju planet dlje casa blizu mimobezne zvezde, torej le-ta dlje casa deluje nanj.}
+        \label{fig:task2_negative}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.4\textwidth]{../images/task2_positive/task2_trajectory_phi=0.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/task2_positive/task2_trajectory_phi=157079632679.pdf}\\
+        \includegraphics[width=0.4\textwidth]{../images/task2_positive/task2_trajectory_phi=314159265359.pdf}
+        \includegraphics[width=0.4\textwidth]{../images/task2_positive/task2_trajectory_phi=471238898038.pdf}
+        \caption{Gibanje v smeri urinega kazalca za razlicne vrednosti zacetne faze $\varphi$. Opazimo, da v nekaj primerih planet pobegne od sonca, kar pa se zgodi zato,
+        ker je pri tem gibanju planet dlje casa blizu mimobezne zvezde, torej le-ta dlje casa deluje nanj.}
+        \label{fig:task2_positive}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=\textwidth]{../images/to_use/task2_trajectory_phi=392699081699.pdf}\\
+        \includegraphics[width=\textwidth]{../images/to_use/task2_trajectory_phi=13.pdf}\\
+        \includegraphics[width=\textwidth]{../images/to_use/task2_trajectory_phi=417831822927.pdf}
+        \caption{Pri dolocenih vrednostih $\varphi$ se planet vtiri v orbito mimobezne zvezde. Ocenimo, da to velja za $\varphi \in (1.2\pi, 1.5\pi)$.}
+        \label{fig:task2_follows}
+    \end{figure}
+\end{document}
